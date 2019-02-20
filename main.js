@@ -107,9 +107,15 @@ function addToggleButton(id, completed = false){
   toggle.addEventListener('click', (e) => { toggleEventHandler(e, id) })
 }
 
+/**
+ * When an todo item is toggled as complete or not complete, we update
+ * localStorage with its new state. In the view, we add a class to the item
+ * to display it with a strikethrough or not.
+ *
+ * @param {Object} e    - The dom object passed through from the toggle event.
+ * @param {Number} id   - The id of the todo item that was toggled.
+ */
 function toggleEventHandler(e, id) {
-  const isChecked = e.target.hasAttribute('checked')
-  const todoText = document.getElementById(`todo-${id}`)
   const todos = JSON.parse(window.localStorage.getItem('todos'))
 
   const updatedTodos = todos.map((todo) => {
@@ -119,6 +125,11 @@ function toggleEventHandler(e, id) {
     return todo
   })
 
+  window.localStorage.setItem('todos', JSON.stringify(updatedTodos))
+
+  const isChecked = e.target.hasAttribute('checked')
+  const todoText = document.getElementById(`todo-${id}`)
+
   if (isChecked) {
     e.target.removeAttribute('checked')
     todoText.classList.remove('strike')
@@ -126,10 +137,16 @@ function toggleEventHandler(e, id) {
     e.target.setAttribute('checked', '')
     todoText.classList.add('strike')
   }
-
-  window.localStorage.setItem('todos', JSON.stringify(updatedTodos))
 }
 
+/**
+ * When we add a new todo text, we also need to append a delete button.
+ * This function is used for both newly created todo items and for those
+ * we pull into the view from localStorage.
+ *
+ * @param {Object} el  - The todo item we need to add a delete button to.
+ * @param {Number} id  - The id of the todo item.
+ */
 function addDeleteButton(el, id){
   const button = document.createElement('button')
   const text = document.createTextNode('Delete')
@@ -139,6 +156,12 @@ function addDeleteButton(el, id){
   button.addEventListener('click', () => { removeElement(id) })
 }
 
+/**
+ * Updating the view as well as the localStorage with a new
+ * todo task.
+ *
+ * @param {String} task - The todo task string value.
+ */
 function addToStore(task){
   const uniqueId = Number(window.localStorage.getItem('uniqueId'))
   const newTodoItem = {id: uniqueId, task, completed: false}
@@ -150,12 +173,21 @@ function addToStore(task){
   incrementUniqueId()
 }
 
+/**
+ * A helper function that increments the "uniqueId" value in localStorage.
+ * We call this every time a new todo item is created. The value it generates
+ * and stored will be the id for the next todo item.
+ */
 function incrementUniqueId() {
-  let uniqueId = window.localStorage.getItem('uniqueId')
-  uniqueId++
+  let uniqueId = Number(window.localStorage.getItem('uniqueId')) + 1
   window.localStorage.setItem('uniqueId', uniqueId)
 }
 
+/**
+ * Removes the todo item from localStroage as well as from the view.
+ *
+ * @param {Number} id  - The id of the todo item.
+ */
 function removeElement(id) {
   const todos = JSON.parse(window.localStorage.getItem('todos'))
   const updatedTodos = todos.filter(todo => todo.id !== id)
